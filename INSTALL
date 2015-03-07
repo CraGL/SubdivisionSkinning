@@ -1,7 +1,6 @@
-## Install the OpenSubdiv 2.x dependency
-
+## Download and compile the OpenSubdiv 2.x dependency
 mkdir -p OpenSubdiv
-git clone https://github.com/PixarAnimationStudios/OpenSubdiv.git OpenSubdiv
+git clone https://github.com/PixarAnimationStudios/OpenSubdiv.git
 (
     cd OpenSubdiv
     &&
@@ -17,17 +16,22 @@ git clone https://github.com/PixarAnimationStudios/OpenSubdiv.git OpenSubdiv
     )
 
 
-## To compile Release or Debug
+## Download libigl and compile the third-party dependencies
+git clone https://github.com/libigl/libigl.git
+( cd libigl/external/AntTweakBar/src && make )
+( cd libigl/external/embree && make build && cd build && cmake .. && make )
+( cd libigl/external/embree && make build && cd build && cmake .. && make )
+( cd libigl/external/tetgen && make )
+( cd libigl/external/yimg && make )
 
-mkdir -p build/Release
-mkdir -p build/Debug
+
+## Compile this project (libsubdivision_skinning and subdivgui)
+mkdir build
 cd build
-
-cd Release
-cmake -DCMAKE_BUILD_TYPE=Release ../..
+cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 cd ..
 
-cd Debug
-cmake -DCMAKE_BUILD_TYPE=Debug ../..
-make
+
+## Run subdivgui
+./build/subdivgui/subdivgui subdivgui/torus{.obj,.tgf,-weights.dmat}

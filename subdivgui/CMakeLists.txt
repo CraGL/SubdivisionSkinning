@@ -53,7 +53,9 @@ set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES})
 
 ## Our library
 include_directories("${CMAKE_SOURCE_DIR}/lib")
-find_library(SUBDIVISION_SKINNING_LIB subdivision_skinning "${CMAKE_BINARY_DIR}/lib")
+## I'm not good enough at CMake to use find_library() on a previous subdirectories output.
+# find_library(SUBDIVISION_SKINNING_LIB subdivision_skinning "${CMAKE_BINARY_DIR}/lib")
+set(SUBDIVISION_SKINNING_LIB "${CMAKE_BINARY_DIR}/lib/libsubdivision_skinning.a")
 ## OpenSubdiv library is defined by the CMakeList from our lib directory, which
 ## is processed first.
 set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${SUBDIVISION_SKINNING_LIB} ${OPENSUBDIV_LIBRARY})
