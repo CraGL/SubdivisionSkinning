@@ -1,3 +1,6 @@
+#ifndef __subdivision_skinning_wrapper_h__
+#define __subdivision_skinning_wrapper_h__
+
 typedef float subdivision_evaluator_real_t;
 
 /*
@@ -100,3 +103,5 @@ NOTE: The 'refined_vertices_out' parameter must point to (at least) 'vertex_dime
 NOTE: 'vertex_dimension' must be positive (greater than zero).
 */
 void get_refined_vertices_of_subdivision_skinning_engine_with_control_vertices( const void* subdivision_skinning_engine, int vertex_dimension, const subdivision_evaluator_real_t* control_vertices, subdivision_evaluator_real_t* refined_vertices_out );
+
+#endif /* __subdivision_skinning_wrapper_h__ */

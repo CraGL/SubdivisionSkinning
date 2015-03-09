@@ -18,15 +18,15 @@ This code depends on:
         - yimg
         - tetgen
     - not included sub-dependencies:
-        - CGAL (e.g. `brew install cgal`)
-    - mosek (optional)
+        - [CGAL](http://www.cgal.org) (e.g. `brew install cgal`)
+    - [MOSEK](https://www.mosek.com) (optional)
 - [eigen](http://eigen.tuxfamily.org/) (e.g. `brew install eigen`)
 
-Academics can install Mosek for free, but this is optional.
+Academics can install MOSEK for free, but this is optional.
 The CMakeFiles define the flag `-DIGL_NO_MOSEK` to disable Mosek support when building this
 project.
 
-## Download and compile the OpenSubdiv 2.x dependency
+### Download and compile the OpenSubdiv 2.x dependency
     git clone https://github.com/PixarAnimationStudios/OpenSubdiv.git
     (
         cd OpenSubdiv
@@ -43,33 +43,37 @@ project.
         )
 
 
-## Download libigl and compile the third-party dependencies
+### Download libigl and compile the third-party dependencies
     git clone https://github.com/libigl/libigl.git
     ( cd libigl/external/AntTweakBar/src && make )
-    ( cd libigl/external/embree && make build && cd build && cmake .. && make )
-    ( cd libigl/external/embree && make build && cd build && cmake .. && make )
+    ( cd libigl/external/embree && mkdir build && cd build && cmake .. && make )
+    ( cd libigl/external/embree && mkdir build && cd build && cmake .. && make )
     ( cd libigl/external/tetgen && make )
     ( cd libigl/external/yimg && make )
 
 
-## Compile this project (libsubdivision_skinning and subdivgui)
+### Compile this project (libsubdivision_skinning and subdivgui)
     mkdir build
     cd build
     cmake -DCMAKE_BUILD_TYPE=Release ..
     make
     cd ..
 
-# Using the library
+
+## Using the library
 
 The library is compiled into
     build/lib/libsubdivision_skinning.{a,dylib}
 
-The library interface is exposed through a pure-C interface. The header file describing the functions is in
+The library interface is exposed through a simple pure-C interface. The header file describing the functions is in
     lib/subdivision_skinning_wrapper.h
 
-The included GUI is a usage example: `subdivgui/subdivgui.cpp`
+A simple usage example can be found in
+    lib/subdivision_skinning_wrapper_test.cpp
 
-# Running the included GUI
+
+## Running the included GUI
+
 Prepare a coarse subdivision surface cage as a .obj file `cage.obj` and a skeleton using
 the [.tgf file
 format](http://igl.ethz.ch/projects/libigl/file-formats/tgf.html) of libigl
@@ -79,11 +83,17 @@ skeleton with a GUI.
 
 Run this program for the first time to compute bounded biharmonic weights:
 
-    ./build/subdivgui/subdivgui cage.obj skeleton.tgf weights.dmat
+    ./build/subdivgui/subdivgui cage.obj skeleton.tgf [computation_level evaluation_level [weights.dmat]]
+
+The computation and evaluation level parameters specify the (integer) level of subdivision to
+use when computing skinning weights and when evaluating the energy described in the paper.
+Skinning weight computation can be lengthy, so computation level is allowed to be a
+smaller number than evaluation level. The defaults are 1 and 3, respectively.
+For very coarse subdivision control meshes, 2 and 4 are more sensible.
 
 You can run the included torus example:
     
-    ./build/subdivgui/subdivgui subdivgui/torus{.obj,.tgf,-weights.dmat}
+    ./build/subdivgui/subdivgui subdivgui/torus{.obj,.tgf} 2 4 subdivgui/torus-weights.dmat
 
 This will attempt to _clean_ the model by meshing self-intersections, and
 filling holes. Then it will compute a tetrahedral mesh of the surface's solid
@@ -97,6 +107,7 @@ interact and change visualization settings.
 
 Subsequent runs of 
 
-    ./build/subdivgui/subdivgui cage.obj skeleton.tgf weights.dmat
+    ./build/subdivgui/subdivgui cage.obj skeleton.tgf computation_level evaluation_level weights.dmat
 
 will load weights from `weights.dmat` rather than recompute them.
+(Computation and evaluation level must be the same between runs.)

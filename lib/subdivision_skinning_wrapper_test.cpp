@@ -1,4 +1,4 @@
-// c++ -g subdivision_skinning_wrapper_test.cpp -o subdivision_skinning_wrapper_test ../build/Release/src/libsubdivision_skinning.a ../OpenSubdiv/build/lib/libosdCPU.a
+// c++ -g subdivision_skinning_wrapper_test.cpp -o subdivision_skinning_wrapper_test ../build/lib/libsubdivision_skinning.a ../OpenSubdiv/build/lib/libosdCPU.a
 
 #include <iostream>
 #include <fstream>
