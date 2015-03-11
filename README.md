@@ -63,12 +63,15 @@ project.
 ## Using the library
 
 The library is compiled into
+
     build/lib/libsubdivision_skinning.{a,dylib}
 
 The library interface is exposed through a simple pure-C interface. The header file describing the functions is in
+
     lib/subdivision_skinning_wrapper.h
 
 A simple usage example can be found in
+
     lib/subdivision_skinning_wrapper_test.cpp
 
 
