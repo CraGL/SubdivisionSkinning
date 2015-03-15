@@ -4,8 +4,16 @@ cmake_minimum_required(VERSION 2.8.6)
 find_package(CGAL REQUIRED)
 ## This conflicts with many of my directives if it isn't first.
 include(${CGAL_USE_FILE})
+# CGAL's monkeying with all of the flags. Rather than change the CGAL_USE_FILE
+# just get ride of this flag.
+# http://stackoverflow.com/a/18234926/148668
+macro(remove_cxx_flag flag)
+  string(REPLACE "${flag}" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+endmacro()
+remove_cxx_flag("-stdlib=libc++")
+
 # This is absolutely necessary for Exact Construction
-set(CMAKE_C_FLAGS "-frounding-math -fsignaling-nans")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -frounding-math -fsignaling-nans")
 #set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${CGAL_LIBRARIES} ${CGAL_3RD_PARTY_LIBRARIES})
 
 ## We need Eigen
@@ -13,7 +21,12 @@ find_package(Eigen3 REQUIRED)
 include_directories( "${EIGEN3_INCLUDE_DIR}" )
 
 ## We need libigl
-set(LIBIGL "${CMAKE_SOURCE_DIR}/libigl")
+
+if(DEFINED ENV{LIBIGL})
+  set(LIBIGL $ENV{LIBIGL})
+else(DEFINED ENV{LIBIGL})
+  set(LIBIGL "${CMAKE_SOURCE_DIR}/libigl")
+endif(DEFINED ENV{LIBIGL})
 include_directories("${LIBIGL}/include")
 
 ## We don't have/want MOSEK
@@ -26,7 +39,7 @@ set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${ANTTWEAKBAR_LIB})
 
 ## Embree
 include_directories("${LIBIGL}/external/embree")
-include_directories("${LIBIGL}/external/embree/embree")
+include_directories("${LIBIGL}/external/embree/include")
 find_library(EMBREE_MAIN_LIB NAMES embree PATHS "${LIBIGL}/external/embree/build")
 find_library(EMBREE_SYS_LIB NAMES sys PATHS "${LIBIGL}/external/embree/build")
 set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${EMBREE_MAIN_LIB} ${EMBREE_SYS_LIB})
@@ -61,7 +74,7 @@ set(SUBDIVISION_SKINNING_LIB "${CMAKE_BINARY_DIR}/lib/libsubdivision_skinning.a"
 set(SUBDIVGUI_LIBS ${SUBDIVGUI_LIBS} ${SUBDIVISION_SKINNING_LIB} ${OPENSUBDIV_LIBRARY})
 
 ## We need C++11. Put this directive after CGAL's include.
-set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 add_executable(subdivgui
     subdivgui.cpp
