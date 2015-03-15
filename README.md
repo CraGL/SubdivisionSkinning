@@ -42,6 +42,17 @@ project.
         make
         )
 
+To compile using gcc on Mac OS X, consider replacing the last two commands
+with:
+
+    cmake -DCMAKE_BUILD_TYPE=Release -DNO_EXAMPLES=1 -DNO_GCD=1 -DNO_CUDA=1 ..
+    &&
+    make osd_static_cpu
+
+If you installed opensubdiv somewhere other than _this_ directory, then
+create a symbolic link to it. For example,
+
+    ln -s ~/Documents/OpenSubdiv OpenSubdiv
 
 ### Download libigl and compile the third-party dependencies
     git clone https://github.com/libigl/libigl.git
