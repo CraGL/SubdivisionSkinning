@@ -47,7 +47,6 @@ project.
     git clone https://github.com/libigl/libigl.git
     ( cd libigl/external/AntTweakBar/src && make )
     ( cd libigl/external/embree && mkdir build && cd build && cmake .. && make )
-    ( cd libigl/external/embree && mkdir build && cd build && cmake .. && make )
     ( cd libigl/external/tetgen && make )
     ( cd libigl/external/yimg && make )
 
