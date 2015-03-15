@@ -34,14 +34,14 @@ bool robust_bbw(
     MatrixXi _1;
 #ifdef VERBOSE
     cerr<<"mesh_with_skeleton"<<endl;
-    writeOBJ("mesh_with_skeleton.obj",CV,CF);
+    //writeOBJ("mesh_with_skeleton.obj",CV,CF);
 #endif
     if(!mesh_with_skeleton(CV,CF,C,{},BE,{},10,"pq1.5Y",TV,TT,_1))
     {
       cout<<REDRUM("tetgen failed.")<<endl;
       return false;
     }
-    writeMESH("mesh_with_skeleton.mesh",TV,TT,MatrixXi());
+    //writeMESH("mesh_with_skeleton.mesh",TV,TT,MatrixXi());
   }
   // Finally, tetgen may have still included some insanely small tets.
   // Just ignore these during weight computation (and hope they don't isolate
@@ -90,8 +90,8 @@ bool robust_bbw(
   {
     return false;
   }
-  writeDMAT("W.dmat",W);
-  writeDMAT("IM.dmat",(IM.array()+1).eval());
+  //writeDMAT("W.dmat",W);
+  //writeDMAT("IM.dmat",(IM.array()+1).eval());
   // Normalize weights to sum to one
   normalize_row_sums(W,W);
   MatrixXd oldW = W;

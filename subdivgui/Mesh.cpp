@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <igl/per_vertex_normals.h>
 #include <igl/polygon_mesh_to_triangle_mesh.h>
 #include <igl/per_face_normals.h>
 #include <igl/draw_mesh.h>
@@ -8,25 +9,67 @@ void Mesh::draw_and_cache()
 {
   using namespace Eigen;
   using namespace igl;
-  if(wireframe)
+  if(wireframe || show_weights)
   {
     glPushAttrib(GL_POLYGON_BIT);
     glPushAttrib(GL_ENABLE_BIT);
     glPushAttrib(GL_LIGHTING_BIT);
     glPushAttrib(GL_LINE_BIT);
-    glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    if(wireframe)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    }
     glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT_AND_DIFFUSE);
-    glColor3f(0,0,0);
+    if(show_weights)
+    {
+      glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT);
+      glColor3f(0.1,0.1,0.1);
+      glColorMaterial(GL_FRONT_AND_BACK,GL_SPECULAR);
+      glColor3f(0.4,0.4,0.4);
+    }else
+    {
+      glColorMaterial(GL_FRONT_AND_BACK,GL_AMBIENT);
+      glColor3f(0.,0,0);
+      glColorMaterial(GL_FRONT_AND_BACK,GL_SPECULAR);
+      glColor3f(0.,0,0);
+    }
+    glColorMaterial(GL_FRONT_AND_BACK,GL_DIFFUSE);
+    if(wireframe)
+    {
+      glColor3f(0,0,0);
+    }
     if(!glIsList(dl) || stale)
     {
+      assert(V.rows() == U.rows());
+      if(show_weights && W.cols()>0)
+      {
+        per_vertex_normals(U,F,N);
+        C.resize(V.rows(),3);
+        for(size_t v = 0;v<V.rows();v++)
+        {
+          C(v,0) = 1;
+          double w = 0;
+          for(size_t selected_weight : selected_weights)
+          {
+            w+=W(v,selected_weight);
+          }
+          C(v,1) = 1.-w;
+          C(v,2) = 1.-w;
+        }
+      }
       if(glIsList(dl))
       {
         glDeleteLists(dl,1);
       }
       dl = glGenLists(1);
       glNewList(dl,GL_COMPILE_AND_EXECUTE);
-      draw_mesh(U,Q,N);
+      if(show_weights)
+      {
+        draw_mesh(U,F,N,C);
+      }else
+      { 
+        draw_mesh(U,Q,N);
+      }
       glEndList();
     }else
     {
