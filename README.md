@@ -3,7 +3,7 @@
 This code implements the subdivision surface portion of our SIGGRAPH Asia 2014 paper
 [Skinning Cubic Bézier Splines and Catmull-Clark Subdivision Surfaces](http://cs.gmu.edu/~ygingold/splineskin/)
 by [Songrun Liu](http://cs.gmu.edu/~sliu11/), [Alec Jacobson](http://www.cs.columbia.edu/~jacobson/), and [Yotam Gingold](http://cs.gmu.edu/~ygingold/).
-The implementation consists of a library and a GUI for posing subdivision surfaces with skeletons
+The implementation consists of a library and a GUI for posing subdivision surfaces with skeletons.
 
 ## Compiling
 
