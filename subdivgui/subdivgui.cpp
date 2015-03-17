@@ -49,7 +49,6 @@ extern "C"
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
-#include <Carbon/Carbon.h>
 #else
 #include <GL/glut.h>
 #endif
@@ -74,6 +73,7 @@ enum SkelStyleType
   SKEL_STYLE_TYPE_VECTOR_GRAPHICS = 1,
   NUM_SKEL_STYLE_TYPE = 2
 }skel_style;
+bool show_skeleton = true;
 
 double fps = 0.;
 bool force_anim = false;
@@ -196,6 +196,7 @@ void reshape(int width, int height)
   camera.m_aspect = (double)width/(double)height;
   s.mouse.reshape(width,height);
 }
+    
 
 void push_scene()
 {
@@ -484,7 +485,10 @@ void display()
 
   glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
   glDisable(GL_DEPTH_TEST);
-  draw_skeleton(T);
+  if(show_skeleton)
+  {
+    draw_skeleton(T);
+  }
 
   if(centroid_is_visible && c.U.rows() > 0)
   {
@@ -621,6 +625,22 @@ void mouse(int glutButton, int glutState, int mouse_x, int mouse_y)
             MouseController::VectorXb S;
             MouseController::propogate_to_descendants_if(
               s.mouse.selection(),P,S);
+            vector<size_t> selected_weights;
+            for(size_t s = 0;s<S.rows();s++)
+            {
+              if(S(s))
+              {
+                selected_weights.push_back(s);
+              }
+            }
+            if(selected_weights.size() > 0)
+            {
+              r.selected_weights = selected_weights;
+              if(r.show_weights)
+              {
+                r.stale = true;
+              }
+            }
             MouseController::color_if(S,MAYA_SEA_GREEN,MAYA_VIOLET,s.colors);
           }
           break;
@@ -844,12 +864,12 @@ void key(unsigned char key, int mouse_x, int mouse_y)
       s.mouse.reset_rotations();
       break;
     }
-    case 'S':
-    case 's':
-    {
-      save();
-      break;
-    }
+    //case 'S':
+    //case 's':
+    //{
+    //  save();
+    //  break;
+    //}
     case 'z':
     case 'Z':
       is_rotating = false;
@@ -1009,12 +1029,10 @@ int main(int argc, char * argv[])
     (refined_vs,3,num_refined_vs);
   r.V = VT.cast<double>().transpose();
   delete[] refined_vs;
-    
 
   /////////////////////////////////////////////////////////////////////////
   // Load skeleton and load/compute weights
   /////////////////////////////////////////////////////////////////////////
-  MatrixXd W;
   // Read in skeleton and precompute hierarchy
   readTGF(skel_filename,C,BE);
   // initialize mouse interface
@@ -1027,11 +1045,11 @@ int main(int argc, char * argv[])
   if(weights_filename.size() == 0 || !file_exists(weights_filename.c_str()))
   {
     cout<<YELLOWGIN("Computing weights...")<<endl;
-    //robust_bbw(V,F,C,BE,W);
-    subdiv_weights(c.V,c.Q,C,BE,comp_level,eval_level,WEIGHTS_TYPE_BBW,W);
+    //robust_bbw(V,F,C,BE,r.W);
+    subdiv_weights(c.V,c.Q,C,BE,comp_level,eval_level,WEIGHTS_TYPE_BBW,r.W);
     if(weights_filename.size() > 0)
     {
-      if(writeDMAT(weights_filename,W))
+      if(writeDMAT(weights_filename,r.W))
       {
         cout<<GREENGIN("Saved weights to "<<weights_filename)<<endl;
       }else
@@ -1042,21 +1060,23 @@ int main(int argc, char * argv[])
   }else
   {
     // Read in weights and precompute LBS matrix
-    readDMAT(weights_filename,W);
+    readDMAT(weights_filename,r.W);
   }
+
+  assert(r.W.rows() == r.V.rows() && "#W must match #r.V");
   // Use refined mesh for lbs
   l = r;
-  lbs_matrix(l.V,W,M);
-  if(W.cols() != BE.rows())
+  lbs_matrix(l.V,r.W,M);
+  if(r.W.cols() != BE.rows())
   {
-    cerr<<REDRUM("# cols in weights ("<<W.cols()<<
+    cerr<<REDRUM("# cols in weights ("<<r.W.cols()<<
       ") != # bones ("<<BE.rows()<<")")<<endl;
     return EXIT_FAILURE;
   }
 
-  if(num_refined_vs != W.rows())
+  if(num_refined_vs != r.W.rows())
   {
-    cerr<<REDRUM("# rows in weights ("<<W.rows()<<
+    cerr<<REDRUM("# rows in weights ("<<r.W.rows()<<
       ") != # refined vertices ("<<
       num_refined_vs<<") at level ("<<
       eval_level<<")")<<endl;
@@ -1067,9 +1087,9 @@ int main(int argc, char * argv[])
   // Tell subdiv lib about weights
   /////////////////////////////////////////////////////////////////////////
   const Matrix<subdivision_evaluator_real_t,Dynamic,Dynamic> WT = 
-    W.cast<subdivision_evaluator_real_t>().transpose();
+    r.W.cast<subdivision_evaluator_real_t>().transpose();
   const subdivision_evaluator_real_t * weights = WT.data();
-  engine = new_subdivision_skinning_engine( eval, W.cols(), weights );
+  engine = new_subdivision_skinning_engine( eval, r.W.cols(), weights );
 
 
   // Handle degenerate quads before draw (these only occur in coarse)
@@ -1118,6 +1138,8 @@ int main(int argc, char * argv[])
   TwType SkelStyleTypeTW = ReTwDefineEnumFromString("SkelStyleType",
     "3d,vector-graphics");
   rebar.TwAddVarRW("style",SkelStyleTypeTW,&skel_style,"");
+  rebar.TwAddVarRW("r_show_weights", TW_TYPE_BOOLCPP,&r.show_weights,"key=w");
+  rebar.TwAddVarRW("show_skeleton", TW_TYPE_BOOLCPP,&show_skeleton,"keyIncr=s keyDecr=S");
   rebar.load(REBAR_NAME);
 
   // Init antweakbar

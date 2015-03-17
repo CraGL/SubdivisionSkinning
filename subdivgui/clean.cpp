@@ -20,7 +20,7 @@ bool clean(
   using namespace igl;
   using namespace Eigen;
   using namespace std;
-  writeOBJ("VF.obj",V,F);
+  //writeOBJ("VF.obj",V,F);
   const auto & validate_IM = [](
     const Eigen::MatrixXd & V,
     const Eigen::MatrixXd & CV,
@@ -68,7 +68,7 @@ bool clean(
     // p  polygon input
 #ifdef VERBOSE
     cerr<<"tetrahedralize"<<endl;
-    writeOBJ("CVCF.obj",CV,CF);
+    //writeOBJ("CVCF.obj",CV,CF);
 #endif
     CDTParam params;
     params.flags = "CY";
@@ -78,7 +78,7 @@ bool clean(
       cout<<REDRUM("CDT failed.")<<endl;
       return false;
     }
-    writeMESH("TVTT.mesh",TV,TT,MatrixXi());
+    //writeMESH("TVTT.mesh",TV,TT,MatrixXi());
   }
   {
     MatrixXd BC;
@@ -102,7 +102,7 @@ bool clean(
     }
     assert(c==count);
     boundary_facets(CT,CF);
-    writeMESH("CVCTCF.mesh",TV,CT,CF);
+    //writeMESH("CVCTCF.mesh",TV,CT,CF);
     cout<<"remove_unreferenced"<<endl;
     // Force all original vertices to be referenced
     MatrixXi FF = F;
